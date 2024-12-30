@@ -1,4 +1,4 @@
-package services;
+package Service;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

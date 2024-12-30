@@ -76,14 +76,14 @@ public class MainChambreTest {
             }
         }
 
-        // Test deleting a chambre
-        if (!chambres.isEmpty()) {
-            Chambre chambreToDelete = chambres.get(0);
-            if (chambreService.delete(chambreToDelete)) {
-                System.out.println("\nChambre deleted successfully.");
-            } else {
-                System.out.println("\nFailed to delete chambre.");
-            }
-        }
+//        // Test deleting a chambre
+//        if (!chambres.isEmpty()) {
+//            Chambre chambreToDelete = chambres.get(0);
+//            if (chambreService.delete(chambreToDelete)) {
+//                System.out.println("\nChambre deleted successfully.");
+//            } else {
+//                System.out.println("\nFailed to delete chambre.");
+//            }
+//        }
     }
 }

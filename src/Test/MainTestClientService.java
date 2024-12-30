@@ -1,6 +1,6 @@
 package Test;
 
-import services.ClientService;
+import Service.ClientService;
 import Entities.Client;
 import java.util.List;
 
