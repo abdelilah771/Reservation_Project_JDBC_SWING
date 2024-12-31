@@ -3,7 +3,7 @@ package Test;
 import Entities.Categorie;
 import Entities.Chambre;
 import Service.ChambreService;
-import services.CategorieService;
+import Service.CategorieService;
 
 import java.util.List;
 

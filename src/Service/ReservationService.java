@@ -67,16 +67,16 @@ public class ReservationService implements Idao<Reservation> {
 
     @Override
     public Reservation findById(int id) {
-        String query = "SELECT r.*, c.id AS chambre_id, cl.id AS client_id " +
+        String query = "SELECT r.*, c.telephone AS chambre_telephone, cl.nom AS client_nom, cl.prenom AS client_prenom, cl.telephone AS client_telephone, cl.email AS client_email " +
                 "FROM reservation r " +
                 "JOIN chambre c ON r.chambre_id = c.id " +
-                "JOIN client cl ON r.client_id = cl.id WHERE r.id = ?";
+                "JOIN clients cl ON r.client_id = cl.id WHERE r.id = ?";
         try (PreparedStatement ps = Connexion.getCnx().prepareStatement(query)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    Client client = new Client(rs.getInt("client_id"), rs.getString("nom"), rs.getString("prenom"), rs.getString("telephone"), rs.getString("email"));
-                    Chambre chambre = new Chambre(rs.getInt("chambre_id"), rs.getString("telephone"), null); // Fetch categorie if needed
+                    Client client = new Client(rs.getInt("client_id"), rs.getString("client_nom"), rs.getString("client_prenom"), rs.getString("client_telephone"), rs.getString("client_email"));
+                    Chambre chambre = new Chambre(rs.getInt("chambre_id"), rs.getString("chambre_telephone"), null);
                     return new Reservation(rs.getInt("id"), client, chambre, rs.getDate("datedebut"), rs.getDate("datefin"));
                 }
             }
@@ -89,15 +89,15 @@ public class ReservationService implements Idao<Reservation> {
     @Override
     public List<Reservation> findAll() {
         List<Reservation> reservations = new ArrayList<>();
-        String query = "SELECT r.*, c.id AS chambre_id, cl.id AS client_id " +
+        String query = "SELECT r.*, c.telephone AS chambre_telephone, cl.nom AS client_nom, cl.prenom AS client_prenom, cl.telephone AS client_telephone, cl.email AS client_email " +
                 "FROM reservation r " +
                 "JOIN chambre c ON r.chambre_id = c.id " +
-                "JOIN client cl ON r.client_id = cl.id";
+                "JOIN clients cl ON r.client_id = cl.id";
         try (Statement st = Connexion.getCnx().createStatement();
              ResultSet rs = st.executeQuery(query)) {
             while (rs.next()) {
-                Client client = new Client(rs.getInt("client_id"), rs.getString("nom"), rs.getString("prenom"), rs.getString("telephone"), rs.getString("email"));
-                Chambre chambre = new Chambre(rs.getInt("chambre_id"), rs.getString("telephone"), null); // Fetch categorie if needed
+                Client client = new Client(rs.getInt("client_id"), rs.getString("client_nom"), rs.getString("client_prenom"), rs.getString("client_telephone"), rs.getString("client_email"));
+                Chambre chambre = new Chambre(rs.getInt("chambre_id"), rs.getString("chambre_telephone"), null);
                 reservations.add(new Reservation(rs.getInt("id"), client, chambre, rs.getDate("datedebut"), rs.getDate("datefin")));
             }
         } catch (SQLException e) {

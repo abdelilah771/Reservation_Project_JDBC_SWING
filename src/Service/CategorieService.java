@@ -1,77 +1,66 @@
-package services;
+package Service;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-import IDAO.Idao;
 import Connection_Project.Connexion;
 import Entities.Categorie;
+import IDAO.Idao;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CategorieService implements Idao<Categorie> {
 
     @Override
-    public boolean create(Categorie o) {
-        String req = "INSERT INTO categorie VALUES (null, ?, ?)";
-        try {
-            PreparedStatement ps = Connexion.getCnx().prepareStatement(req);
-            ps.setString(1, o.getCode());
-            ps.setString(2, o.getLibelle());
-            if (ps.executeUpdate() == 1) {
-                return true;
-            }
+    public boolean create(Categorie categorie) {
+        String query = "INSERT INTO categorie (code, libelle) VALUES (?, ?)";
+        try (PreparedStatement ps = Connexion.getCnx().prepareStatement(query)) {
+            ps.setString(1, categorie.getCode());
+            ps.setString(2, categorie.getLibelle());
+            return ps.executeUpdate() == 1;
         } catch (SQLException e) {
-            System.out.println("Erreur de create SQL: " + e.getMessage());
+            System.out.println("Error creating categorie: " + e.getMessage());
+            return false;
         }
-        return false;
     }
 
     @Override
-    public boolean update(Categorie o) {
-        String req = "UPDATE categorie SET code = ?, libelle = ? WHERE id = ?";
-        try {
-            PreparedStatement ps = Connexion.getCnx().prepareStatement(req);
-            ps.setString(1, o.getCode());
-            ps.setString(2, o.getLibelle());
-            ps.setInt(3, o.getId());
-            if (ps.executeUpdate() == 1) {
-                return true;
-            }
+    public boolean update(Categorie categorie) {
+        String query = "UPDATE categorie SET code = ?, libelle = ? WHERE id = ?";
+        try (PreparedStatement ps = Connexion.getCnx().prepareStatement(query)) {
+            ps.setString(1, categorie.getCode());
+            ps.setString(2, categorie.getLibelle());
+            ps.setInt(3, categorie.getId());
+            return ps.executeUpdate() == 1;
         } catch (SQLException e) {
-            System.out.println("Erreur update SQL: " + e.getMessage());
+            System.out.println("Error updating categorie: " + e.getMessage());
+            return false;
         }
-        return false;
     }
 
     @Override
-    public boolean delete(Categorie o) {
-        String req = "DELETE FROM categorie WHERE id = ?";
-        try {
-            PreparedStatement ps = Connexion.getCnx().prepareStatement(req);
-            ps.setInt(1, o.getId());
-            if (ps.executeUpdate() == 1) {
-                return true;
-            }
+    public boolean delete(Categorie categorie) {
+        String query = "DELETE FROM categorie WHERE id = ?";
+        try (PreparedStatement ps = Connexion.getCnx().prepareStatement(query)) {
+            ps.setInt(1, categorie.getId());
+            return ps.executeUpdate() == 1;
         } catch (SQLException e) {
-            System.out.println("Erreur delete SQL: " + e.getMessage());
+            System.out.println("Error deleting categorie: " + e.getMessage());
+            return false;
         }
-        return false;
     }
 
     @Override
     public Categorie findById(int id) {
-        String req = "SELECT * FROM categorie WHERE id = ?";
-        try {
-            PreparedStatement ps = Connexion.getCnx().prepareStatement(req);
+        String query = "SELECT * FROM categorie WHERE id = ?";
+        try (PreparedStatement ps = Connexion.getCnx().prepareStatement(query)) {
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return new Categorie(rs.getInt("id"), rs.getString("code"), rs.getString("libelle"));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Categorie(rs.getInt("id"), rs.getString("code"), rs.getString("libelle"));
+                }
             }
         } catch (SQLException e) {
-            System.out.println("Erreur select par id SQL: " + e.getMessage());
+            System.out.println("Error finding categorie by ID: " + e.getMessage());
         }
         return null;
     }
@@ -79,17 +68,15 @@ public class CategorieService implements Idao<Categorie> {
     @Override
     public List<Categorie> findAll() {
         List<Categorie> categories = new ArrayList<>();
-        String req = "SELECT * FROM categorie";
-        try {
-            PreparedStatement ps = Connexion.getCnx().prepareStatement(req);
-            ResultSet rs = ps.executeQuery();
+        String query = "SELECT * FROM categorie";
+        try (Statement st = Connexion.getCnx().createStatement();
+             ResultSet rs = st.executeQuery(query)) {
             while (rs.next()) {
                 categories.add(new Categorie(rs.getInt("id"), rs.getString("code"), rs.getString("libelle")));
             }
-            return categories;
         } catch (SQLException e) {
-            System.out.println("Erreur select SQL: " + e.getMessage());
+            System.out.println("Error finding all categories: " + e.getMessage());
         }
-        return null;
+        return categories;
     }
 }
