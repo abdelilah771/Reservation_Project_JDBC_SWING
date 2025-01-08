@@ -14,6 +14,9 @@ public class Chambre {
         this.categorie = categorie;
     }
 
+    public Chambre(int i, String s) {
+    }
+
     public int getId() {
         return id;
     }
