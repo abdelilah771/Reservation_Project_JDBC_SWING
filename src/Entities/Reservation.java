@@ -6,9 +6,9 @@ public class Reservation {
     private int id;
     private Client client;
     private Chambre chambre;
-    private java.util.Date datedebut;
-    private java.util.Date datefin;
-    private String approvalStatus; // Added field for approval status
+    private Date datedebut; // java.util.Date for general use
+    private Date datefin;   // java.util.Date for general use
+    private String approvalStatus; // Status of the reservation (Approved/Denied/Pending)
 
     public Reservation() {
     }
@@ -19,8 +19,10 @@ public class Reservation {
         this.chambre = chambre;
         this.datedebut = datedebut;
         this.datefin = datefin;
+        this.approvalStatus = "Pending"; // Default status
     }
 
+    // Getters
     public int getId() {
         return id;
     }
@@ -34,13 +36,32 @@ public class Reservation {
     }
 
     public java.sql.Date getDatedebut() {
-        return new java.sql.Date(datedebut.getTime()); // Convert java.util.Date to java.sql.Date
+        return (java.sql.Date) datedebut;
     }
 
     public java.sql.Date getDatefin() {
-        return new java.sql.Date(datefin.getTime()); // Convert java.util.Date to java.sql.Date
+        return (java.sql.Date) datefin;
     }
 
+    public java.sql.Date getDatedebutAsSqlDate() {
+        if (datedebut != null) {
+            return new java.sql.Date(datedebut.getTime()); // Convert java.util.Date to java.sql.Date
+        }
+        return null;
+    }
+
+    public java.sql.Date getDatefinAsSqlDate() {
+        if (datefin != null) {
+            return new java.sql.Date(datefin.getTime()); // Convert java.util.Date to java.sql.Date
+        }
+        return null;
+    }
+
+    public String getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    // Setters
     public void setId(int id) {
         this.id = id;
     }
@@ -65,10 +86,12 @@ public class Reservation {
         this.approvalStatus = approvalStatus;
     }
 
-    public String getApprovalStatus() {
-        return approvalStatus;
+    // Convenience Method for Approve/Deny
+    public void setApproved(boolean isApproved) {
+        this.approvalStatus = isApproved ? "Approved" : "Denied";
     }
 
-    public void setApproved(boolean b) {
+    public String getStatus() {
+        return approvalStatus;
     }
 }

@@ -20,6 +20,9 @@ public class Client {
 
     }
 
+    public Client(int id, String username, String email, String password) {
+    }
+
     public int getId() {
         return id;
     }
@@ -57,7 +60,9 @@ public class Client {
     }
 
 
+    public String getUsername() {
+    }
 
-
-
+    public String getPassword() {
+    }
 }

@@ -1,93 +1,144 @@
 package Service;
 
+import Connection_Project.Connexion;
+import Entities.Client;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import IDAO.Idao;
-import Connection_Project.Connexion;
-import Entities.Client;
+public class ClientService {
+    private Connection connection = Connexion.getCnx();
 
-public class ClientService implements Idao<Client>{
+    // Register a new client
+    public boolean register(Client client) {
+        String query = "INSERT INTO clients (username, email, password) VALUES (?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, client.getUsername());
+            statement.setString(2, client.getEmail());
+            statement.setString(3, encryptPassword(client.getPassword()));
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error registering client: " + e.getMessage());
+            return false;
+        }
+    }
 
-    @Override
-    public boolean create(Client o) {
-        String req="insert into clients values(null,?,?,?,?)";
-        try {
-            PreparedStatement ps=Connexion.getCnx().prepareStatement(req);
-            ps.setString(1, o.getNom());
-            ps.setString(2,o.getPrenom());
-            ps.setString(3, o.getTelephone());
-            ps.setString(4, o.getEmail());
-            if(ps.executeUpdate()==1) {
-                return true;
+    // Authenticate client login
+    public boolean authenticate(String username, String password) {
+        String query = "SELECT password FROM clients WHERE username = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, username);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    String storedPassword = resultSet.getString("password");
+                    return storedPassword.equals(encryptPassword(password));
+                }
             }
         } catch (SQLException e) {
-            System.out.println("Erreur de create SQL");
+            System.out.println("Error during login: " + e.getMessage());
         }
         return false;
     }
 
-    @Override
-    public boolean update(Client o) {
-        String req="update clients set nom=?,prenom=?,telephone=?,email=? where id=?";
+    // Encrypt the password using SHA-256
+    private String encryptPassword(String password) {
         try {
-            PreparedStatement ps=Connexion.getCnx().prepareStatement(req);
-            ps.setString(1, o.getNom());
-            ps.setString(2,o.getPrenom());
-            ps.setString(3, o.getTelephone());
-            ps.setString(4, o.getEmail());
-            ps.setInt(5, o.getId());
-            if(ps.executeUpdate()==1) {
-                return true;
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedBytes = md.digest(password.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedBytes) {
+                sb.append(String.format("%02x", b));
             }
-        } catch (SQLException e) {
-            System.out.println("Erreur update SQL");
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error encrypting password: " + e.getMessage());
         }
-        return false;
     }
 
-    @Override
-    public boolean delete(Client o) {
-
-        return false;
+    // Create a new client
+    public boolean create(Client client) {
+        String query = "INSERT INTO clients (username, email, password) VALUES (?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, client.getUsername());
+            statement.setString(2, client.getEmail());
+            statement.setString(3, encryptPassword(client.getPassword()));
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error creating client: " + e.getMessage());
+            return false;
+        }
     }
 
-    @Override
+    // Update client information
+    public boolean update(Client client) {
+        String query = "UPDATE clients SET username = ?, email = ?, password = ? WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, client.getUsername());
+            statement.setString(2, client.getEmail());
+            statement.setString(3, encryptPassword(client.getPassword()));
+            statement.setInt(4, client.getId());
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error updating client: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Delete a client
+    public boolean delete(Client client) {
+        String query = "DELETE FROM clients WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, client.getId());
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error deleting client: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Find a client by ID
     public Client findById(int id) {
-        String req="select * from clients where id=?";
-        try {
-            PreparedStatement ps=Connexion.getCnx().prepareStatement(req);
-            ps.setInt(1, id);
-            ResultSet rs=ps.executeQuery();
-            if(rs.next()) {
-                return new Client(rs.getInt(1),rs.getString("nom"),rs.getString(3),rs.getString(4),rs.getString(5));
+        String query = "SELECT * FROM clients WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return new Client(
+                            resultSet.getInt("id"),
+                            resultSet.getString("username"),
+                            resultSet.getString("email"),
+                            resultSet.getString("password")
+                    );
+                }
             }
         } catch (SQLException e) {
-            System.out.println("Erreur select par id SQL");
+            System.out.println("Error finding client by ID: " + e.getMessage());
         }
-
         return null;
     }
 
-    @Override
+    // Find all clients
     public List<Client> findAll() {
-        List<Client> ls=new ArrayList<>();
-        String req="select * from clients";
-        try {
-            PreparedStatement ps=Connexion.getCnx().prepareStatement(req);
-            ResultSet rs=ps.executeQuery();
-            while(rs.next()) {
-                ls.add(new Client(rs.getInt(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5)));
+        List<Client> clients = new ArrayList<>();
+        String query = "SELECT * FROM clients";
+        try (PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                clients.add(new Client(
+                        resultSet.getInt("id"),
+                        resultSet.getString("username"),
+                        resultSet.getString("email"),
+                        resultSet.getString("password")
+                ));
             }
-            return ls;
         } catch (SQLException e) {
-            System.out.println("Erreur select SQL");
+            System.out.println("Error finding all clients: " + e.getMessage());
         }
-
-        return null;
+        return clients;
     }
-
 }

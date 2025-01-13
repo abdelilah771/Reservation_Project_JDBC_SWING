@@ -136,4 +136,33 @@ public class ReservationService implements Idao<Reservation> {
         }
         return false;
     }
+
+    public void approve(int reservationId) {
+        String query = "UPDATE reservation SET status = 'Approved' WHERE id = ?";
+        try (PreparedStatement ps = Connexion.getCnx().prepareStatement(query)) {
+            ps.setInt(1, reservationId);
+            if (ps.executeUpdate() == 1) {
+                System.out.println("Reservation approved successfully!");
+            } else {
+                System.out.println("Failed to approve reservation. Reservation ID not found.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error approving reservation: " + e.getMessage());
+        }
+    }
+
+
+    public void deny(int reservationId) {
+        String query = "UPDATE reservation SET status = 'Denied' WHERE id = ?";
+        try (PreparedStatement ps = Connexion.getCnx().prepareStatement(query)) {
+            ps.setInt(1, reservationId);
+            if (ps.executeUpdate() == 1) {
+                System.out.println("Reservation denied successfully!");
+            } else {
+                System.out.println("Failed to deny reservation. Reservation ID not found.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error denying reservation: " + e.getMessage());
+        }
+    }
 }
