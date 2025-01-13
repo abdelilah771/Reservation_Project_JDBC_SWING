@@ -6,14 +6,18 @@ public class Client {
     private String prenom;
     private String telephone;
     private String email;
+    private String username;
+    private String password;
     private static int count=0;
 
-    public Client(int id,String nom, String prenom, String telephone, String email) {
+    public Client(int id, String nom, String prenom, String telephone, String email, String username, String password) {
         this.id = id;
         this.nom = nom;
         this.prenom = prenom;
         this.telephone = telephone;
         this.email = email;
+        this.username = username;
+        this.password = password;
     }
 
     public Client() {
@@ -21,6 +25,10 @@ public class Client {
     }
 
     public Client(int id, String username, String email, String password) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.password = password;
     }
 
     public int getId() {
@@ -53,16 +61,22 @@ public class Client {
     public void setEmail(String email) {
         this.email = email;
     }
+    public String getUsername() {
+        return username;
+    }
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    public String getPassword() {
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     @Override
     public String toString() {
         return "Client [id=" + id + ", nom=" + nom + ", prenom=" + prenom + ", telephone=" + telephone + ", email="
-                + email + "]";
-    }
-
-
-    public String getUsername() {
-    }
-
-    public String getPassword() {
+                + email + ", username=" + username + "]";
     }
 }
