@@ -31,6 +31,9 @@ public class Client {
         this.password = password;
     }
 
+    public Client(int clientId, String clientNom, String clientPrenom, String clientTelephone, String clientEmail) {
+    }
+
     public int getId() {
         return id;
     }

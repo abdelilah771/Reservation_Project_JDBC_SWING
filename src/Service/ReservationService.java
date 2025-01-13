@@ -106,7 +106,7 @@ public class ReservationService implements Idao<Reservation> {
         return reservations;
     }
 
-    private boolean isRoomReserved(int chambreId, Date startDate, Date endDate) {
+    public boolean isRoomReserved(int chambreId, Date startDate, Date endDate) {
         return isRoomReserved(chambreId, startDate, endDate, -1);
     }
 

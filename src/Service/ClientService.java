@@ -16,11 +16,14 @@ public class ClientService {
 
     // Register a new client
     public boolean register(Client client) {
-        String query = "INSERT INTO clients (username, email, password) VALUES (?, ?, ?)";
+        String query = "INSERT INTO clients (nom, prenom, username, email, password, telephone) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, client.getUsername());
-            statement.setString(2, client.getEmail());
-            statement.setString(3, encryptPassword(client.getPassword()));
+            statement.setString(1, client.getNom());
+            statement.setString(2, client.getPrenom());
+            statement.setString(3, client.getUsername());
+            statement.setString(4, client.getEmail());
+            statement.setString(5, encryptPassword(client.getPassword()));
+            statement.setString(6, client.getTelephone());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println("Error registering client: " + e.getMessage());
@@ -62,11 +65,14 @@ public class ClientService {
 
     // Create a new client
     public boolean create(Client client) {
-        String query = "INSERT INTO clients (username, email, password) VALUES (?, ?, ?)";
+        String query = "INSERT INTO clients (nom, prenom, username, email, password, telephone) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, client.getUsername());
-            statement.setString(2, client.getEmail());
-            statement.setString(3, encryptPassword(client.getPassword()));
+            statement.setString(1, client.getNom());
+            statement.setString(2, client.getPrenom());
+            statement.setString(3, client.getUsername());
+            statement.setString(4, client.getEmail());
+            statement.setString(5, encryptPassword(client.getPassword()));
+            statement.setString(6, client.getTelephone());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println("Error creating client: " + e.getMessage());
@@ -76,12 +82,15 @@ public class ClientService {
 
     // Update client information
     public boolean update(Client client) {
-        String query = "UPDATE clients SET username = ?, email = ?, password = ? WHERE id = ?";
+        String query = "UPDATE clients SET nom = ?, prenom = ?, username = ?, email = ?, password = ?, telephone = ? WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, client.getUsername());
-            statement.setString(2, client.getEmail());
-            statement.setString(3, encryptPassword(client.getPassword()));
-            statement.setInt(4, client.getId());
+            statement.setString(1, client.getNom());
+            statement.setString(2, client.getPrenom());
+            statement.setString(3, client.getUsername());
+            statement.setString(4, client.getEmail());
+            statement.setString(5, encryptPassword(client.getPassword()));
+            statement.setString(6, client.getTelephone());
+            statement.setInt(7, client.getId());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println("Error updating client: " + e.getMessage());
@@ -110,9 +119,12 @@ public class ClientService {
                 if (resultSet.next()) {
                     return new Client(
                             resultSet.getInt("id"),
+                            resultSet.getString("nom"),
+                            resultSet.getString("prenom"),
                             resultSet.getString("username"),
                             resultSet.getString("email"),
-                            resultSet.getString("password")
+                            resultSet.getString("password"),
+                            resultSet.getString("telephone")
                     );
                 }
             }
@@ -131,9 +143,12 @@ public class ClientService {
             while (resultSet.next()) {
                 clients.add(new Client(
                         resultSet.getInt("id"),
+                        resultSet.getString("nom"),
+                        resultSet.getString("prenom"),
                         resultSet.getString("username"),
                         resultSet.getString("email"),
-                        resultSet.getString("password")
+                        resultSet.getString("password"),
+                        resultSet.getString("telephone")
                 ));
             }
         } catch (SQLException e) {

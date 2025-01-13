@@ -1,12 +1,15 @@
 package Service;
 
 import Connection_Project.Connexion;
+import Entities.User;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class UserService {
     private Connection connection = Connexion.getCnx();
@@ -56,4 +59,10 @@ public class UserService {
             throw new RuntimeException("Error encrypting password: " + e.getMessage());
         }
     }
+
+//    public List<User> findAll() {
+//    };
+//
+//    public boolean create(User user) {
+//    }
 }
