@@ -14,16 +14,19 @@ import java.util.List;
 public class ClientService {
     private Connection connection = Connexion.getCnx();
 
+    // Field to hold the logged-in client
+    private Client loggedInClient;
+
     // Register a new client
     public boolean register(Client client) {
-        String query = "INSERT INTO clients (nom, prenom, username, email, password, telephone) VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO clients (nom, prenom, telephone, email, username, password) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, client.getNom());
             statement.setString(2, client.getPrenom());
-            statement.setString(3, client.getUsername());
-            statement.setString(4, client.getEmail());
-            statement.setString(5, encryptPassword(client.getPassword()));
-            statement.setString(6, client.getTelephone());
+            statement.setString(3, client.getTelephone()); // Telephone
+            statement.setString(4, client.getEmail());     // Email
+            statement.setString(5, client.getUsername());  // Username
+            statement.setString(6, encryptPassword(client.getPassword())); // Password
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println("Error registering client: " + e.getMessage());
@@ -33,13 +36,25 @@ public class ClientService {
 
     // Authenticate client login
     public boolean authenticate(String username, String password) {
-        String query = "SELECT password FROM clients WHERE username = ?";
+        String query = "SELECT * FROM clients WHERE username = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, username);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     String storedPassword = resultSet.getString("password");
-                    return storedPassword.equals(encryptPassword(password));
+                    if (storedPassword.equals(encryptPassword(password))) {
+                        // Set the logged-in client information
+                        loggedInClient = new Client(
+                                resultSet.getInt("id"),
+                                resultSet.getString("nom"),
+                                resultSet.getString("prenom"),
+                                resultSet.getString("username"),
+                                resultSet.getString("email"),
+                                resultSet.getString("password"),
+                                resultSet.getString("telephone")
+                        );
+                        return true;
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -65,14 +80,14 @@ public class ClientService {
 
     // Create a new client
     public boolean create(Client client) {
-        String query = "INSERT INTO clients (nom, prenom, username, email, password, telephone) VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO clients (nom, prenom, telephone, email, username, password) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, client.getNom());
             statement.setString(2, client.getPrenom());
-            statement.setString(3, client.getUsername());
-            statement.setString(4, client.getEmail());
-            statement.setString(5, encryptPassword(client.getPassword()));
-            statement.setString(6, client.getTelephone());
+            statement.setString(3, client.getTelephone()); // Telephone
+            statement.setString(4, client.getEmail());     // Email
+            statement.setString(5, client.getUsername());  // Username
+            statement.setString(6, encryptPassword(client.getPassword())); // Password
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println("Error creating client: " + e.getMessage());
@@ -155,5 +170,10 @@ public class ClientService {
             System.out.println("Error finding all clients: " + e.getMessage());
         }
         return clients;
+    }
+
+    // Get the currently logged-in client
+    public Client getLoggedInClient() {
+        return loggedInClient;
     }
 }

@@ -3,8 +3,10 @@ package ui;
 import Entities.Categorie;
 import Entities.Chambre;
 import Entities.Client;
+import Entities.Reservation;
 import Service.ChambreService;
 import Service.ClientService;
+import Service.ReservationService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,15 +14,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-public class ClientServiceTestInterface {
+public class ReservationServiceUIIntegration {
 
     private ClientService clientService;
     private ChambreService chambreService;
+    private ReservationService reservationService;
     private JFrame frame;
 
-    public ClientServiceTestInterface() {
+    public ReservationServiceUIIntegration() {
         clientService = new ClientService();
         chambreService = new ChambreService();
+        reservationService = new ReservationService();
         createUI();
     }
 
@@ -172,10 +176,49 @@ public class ClientServiceTestInterface {
                 try {
                     int chambreId = Integer.parseInt(chambreIdField.getText());
                     Chambre chambre = chambreService.findById(chambreId);
-                    if (chambre != null) {
+                    if (chambre == null) {
+                        JOptionPane.showMessageDialog(chambreFrame, "Chambre not found!", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    JSpinner startDateSpinner = new JSpinner(new SpinnerDateModel());
+                    JSpinner endDateSpinner = new JSpinner(new SpinnerDateModel());
+                    startDateSpinner.setEditor(new JSpinner.DateEditor(startDateSpinner, "yyyy-MM-dd"));
+                    endDateSpinner.setEditor(new JSpinner.DateEditor(endDateSpinner, "yyyy-MM-dd"));
+
+                    JPanel datePanel = new JPanel(new GridLayout(2, 2, 10, 10));
+                    datePanel.add(new JLabel("Start Date:"));
+                    datePanel.add(startDateSpinner);
+                    datePanel.add(new JLabel("End Date:"));
+                    datePanel.add(endDateSpinner);
+
+                    int result = JOptionPane.showConfirmDialog(chambreFrame, datePanel, "Select Reservation Dates", JOptionPane.OK_CANCEL_OPTION);
+                    if (result != JOptionPane.OK_OPTION) {
+                        return;
+                    }
+
+                    java.util.Date startDate = (java.util.Date) startDateSpinner.getValue();
+                    java.util.Date endDate = (java.util.Date) endDateSpinner.getValue();
+
+                    if (endDate.before(startDate)) {
+                        JOptionPane.showMessageDialog(chambreFrame, "End date must be after start date!", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    Client loggedInClient = clientService.getLoggedInClient(); // Assumes this method returns the logged-in client
+                    Reservation reservation = new Reservation(0, loggedInClient, chambre, new java.sql.Date(startDate.getTime()), new java.sql.Date(endDate.getTime()));
+
+                    boolean isReserved = reservationService.isRoomReserved(chambreId, new java.sql.Date(startDate.getTime()), new java.sql.Date(endDate.getTime()));
+                    if (isReserved) {
+                        JOptionPane.showMessageDialog(chambreFrame, "Chambre is already reserved for the selected dates!", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    boolean success = reservationService.create(reservation);
+                    if (success) {
                         JOptionPane.showMessageDialog(chambreFrame, "Reservation successful for Chambre ID: " + chambreId, "Success", JOptionPane.INFORMATION_MESSAGE);
                     } else {
-                        JOptionPane.showMessageDialog(chambreFrame, "Chambre not found!", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(chambreFrame, "Failed to create reservation!", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(chambreFrame, "Invalid Chambre ID!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -185,6 +228,6 @@ public class ClientServiceTestInterface {
     }
 
     public static void main(String[] args) {
-        new ClientServiceTestInterface();
+        new ReservationServiceUIIntegration();
     }
 }

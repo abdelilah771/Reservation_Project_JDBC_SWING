@@ -88,7 +88,6 @@ public class ChambreService implements Idao<Chambre> {
         return null;
     }
 
-    @Override
     public List<Chambre> findAll() {
         List<Chambre> chambres = new ArrayList<>();
         String query = "SELECT chambre.*, categorie.id AS cat_id, categorie.code, categorie.libelle " +
