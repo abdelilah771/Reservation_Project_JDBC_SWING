@@ -152,7 +152,7 @@ public class ClientService {
     // Find all clients
     public List<Client> findAll() {
         List<Client> clients = new ArrayList<>();
-        String query = "SELECT * FROM clients";
+        String query = "SELECT id, nom, prenom, username, email, password, telephone FROM clients";
         try (PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
@@ -160,9 +160,9 @@ public class ClientService {
                         resultSet.getInt("id"),
                         resultSet.getString("nom"),
                         resultSet.getString("prenom"),
-                        resultSet.getString("username"),
+                        resultSet.getString("username"), // Ensure this fetches the correct username column
                         resultSet.getString("email"),
-                        resultSet.getString("password"),
+                        resultSet.getString("password"), // Ensure this fetches the correct password column
                         resultSet.getString("telephone")
                 ));
             }
@@ -172,8 +172,14 @@ public class ClientService {
         return clients;
     }
 
+
     // Get the currently logged-in client
     public Client getLoggedInClient() {
         return loggedInClient;
     }
+
+    public void logout() {
+    }
+
+
 }
